@@ -212,6 +212,8 @@ github repo
 
 ## Authors
 
+* Cesar Augusto Velez Botero <cavb.28@gmail.com> [@cavb28](https://github.com/cavb28)
+* Santiago Velez Garcia <svelez.velezgarcia@gmail.com> [@svelezg](https://github.com/svelezg)
 * MJ Johnson, [@mj31508](https://github.com/mj31508)
 * David John Coleman II, [davidjohncoleman.com](http://www.davidjohncoleman.com/) | [@djohncoleman](https://twitter.com/djohncoleman)
 * Kimberly Wong, [kjowong](https://github.com/kjowong) | [@kjowong](https://twitter.com/kjowong) | [kjowong@gmail.com](kjowong@gmail.com)
