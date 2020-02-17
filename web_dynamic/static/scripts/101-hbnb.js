@@ -2,6 +2,8 @@ const amenities = {};
 const states = {};
 const cities = {};
 let places = {};
+let reviews = {};
+let users = {};
 const searchPlaces = {};
 let searchID = [];
 $(document).ready(function () {
@@ -26,7 +28,7 @@ $(document).ready(function () {
     }
     $('.locations H4').text('');
     let count = 0;
-    Object.entries(cities).forEach(([key, value]) => {
+    Object.entries(states).forEach(([key, value]) => {
       if (count === 0) {
         $('.locations H4').append(value);
       } else {
@@ -35,7 +37,7 @@ $(document).ready(function () {
       }
       count += 1;
     });
-    Object.entries(states).forEach(([key, value]) => {
+    Object.entries(cities).forEach(([key, value]) => {
       if (count === 0) {
         $('.locations H4').append(value);
       } else {
@@ -131,7 +133,53 @@ $(document).ready(function () {
         places = data;
         places.forEach((place, index) => {
           $('.places').append(
-            '<article>' +
+            '<article class="' + place.id + '">' +
+        '<div class="title">' +
+        '<h2>' + place.name + '</h2>' +
+        '<div class="price_by_night">' + place.price_by_night +
+        '</div>' +
+        '</div>' +
+        '<div class="information">' +
+        '<div class="max_guest">' +
+        '<i class="fa fa-users fa-3x" aria-hidden="true"></i>' +
+        '<br />' + place.max_guest + ' Guests' +
+        '</div>' +
+        '<div class="number_rooms">' +
+        '<i class="fa fa-bed fa-3x" aria-hidden="true"></i>' +
+        '<br />' + place.number_rooms + ' Bedrooms' +
+        '</div>' +
+        '<div class="number_bathrooms">' +
+        '<i class="fa fa-bath fa-3x" aria-hidden="true"></i>' +
+        '<br />' + place.number_bathrooms + ' Bathroom' +
+        '</div>' +
+        '</div>' +
+        '<div class="description">' +
+            place.description +
+            '</div>' +
+            '</div> ' +
+            '<div class="reviews">' +
+            '<div class="title">' +
+            '<h2>Reviews</h2>' +
+            '<span class="show" id="' + place.id + '">show</span>' +
+            '</div>' +
+            '</div>' +
+            '</article>');
+        });
+      }
+    });
+  });
+  $.ajax({
+    type: 'POST',
+    contentType: 'application/json',
+    datatype: 'json',
+    url: 'http://0.0.0.0:5001/api/v1/places_search',
+    data: '{}',
+    success: function (data) {
+      console.log(data);
+      places = data;
+      places.forEach((place, index) => {
+        $('.places').append(
+          '<article class="' + place.id + '">' +
         '<div class="title">' +
         '<h2>' + place.name + '</h2>' +
         '<div class="price_by_night">' + place.price_by_night +
@@ -154,47 +202,62 @@ $(document).ready(function () {
         '<div class="description">' +
         place.description +
         '</div>' +
-        '</article>');
-        });
-      }
-    });
-  });
-  $.ajax({
-    type: 'POST',
-    contentType: 'application/json',
-    datatype: 'json',
-    url: 'http://0.0.0.0:5001/api/v1/places_search',
-    data: '{}',
-    success: function (data) {
-      console.log(data);
-      places = data;
-      places.forEach((place, index) => {
-        $('.places').append(
-          '<article>' +
-        '<div class="title">' +
-        '<h2>' + place.name + '</h2>' +
-        '<div class="price_by_night">' + place.price_by_night +
-        '</div>' +
-        '</div>' +
-        '<div class="information">' +
-        '<div class="max_guest">' +
-        '<i class="fa fa-users fa-3x" aria-hidden="true"></i>' +
-        '<br />' + place.max_guest + 'Guests' +
-        '</div>' +
-        '<div class="number_rooms">' +
-        '<i class="fa fa-bed fa-3x" aria-hidden="true"></i>' +
-        '<br />' + place.number_rooms + 'Bedrooms' +
-        '</div>' +
-        '<div class="number_bathrooms">' +
-        '<i class="fa fa-bath fa-3x" aria-hidden="true"></i>' +
-        '<br />' + place.number_bathrooms + 'Bathroom' +
-        '</div>' +
-        '</div>' +
-        '<div class="description">' +
-        place.description +
-        '</div>' +
+          '</div> ' +
+          '<div class="reviews">' +
+          '<div class="title">' +
+          '<h2>Reviews</h2>' +
+          '<span class="show" id="' + place.id + '">show</span>' +
+          '</div>' +
+          '</div>' +
         '</article>');
       });
+    }
+  });
+  $('.places').on('click', 'span.show', function () {
+    const selector = $(this);
+    const spanSelect = '.' + $(this).attr('id') + ' span.show';
+    if ($(spanSelect).text() === 'show') {
+      $(spanSelect).text('hide');
+      console.log($(this).attr('id'));
+      const reviewId = $(this).attr('id');
+      $.ajax({
+        type: 'GET',
+        url: 'http://0.0.0.0:5001/api/v1/places/' + reviewId + '/reviews',
+        success: function (data) {
+          console.log(data);
+          reviews = data;
+          $('.' + reviewId + ' .reviews h2').text(
+            reviews.length + ' Reviews'
+          );
+          reviews.forEach((review, index) => {
+            console.log(review.user_id);
+            $.ajax({
+              type: 'GET',
+              url: 'http://0.0.0.0:5001/api/v1/users/' + review.user_id,
+              success: function (data) {
+                users = data;
+                console.log('************************');
+                console.log(reviews);
+                console.log(users);
+                console.log(users.first_name);
+                console.log(selector);
+                $(selector).parent().parent().append(
+                  '<div class="reviewsContent>"' +
+                  '<ul>' +
+                '<li>' +
+                '<h3>' + users.first_name + ' ' + users.last_name + ' ' + review.created_at.substring(0, 11) + '</h3>' +
+                '<p>' + review.text + '</p>' +
+                '</li>' +
+                '</ul>' +
+                '</div>');
+              }
+            });
+          });
+        }
+      });
+    } else {
+      $(spanSelect).text('show');
+      $(spanSelect).parent().nextAll().empty();
     }
   });
 });
